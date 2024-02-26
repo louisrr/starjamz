@@ -1,0 +1,51 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.2'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.play.stream'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation group: 'org.apache.kafka', name: 'kafka-clients', version: '3.6.1'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.security:spring-security-oauth2-client'
+	implementation 'org.springframework.security:spring-security-oauth2-jose'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'com.datastax.oss:java-driver-core:4.13.0'
+	implementation 'com.datastax.astra:astra-spring-boot-starter:0.1.13'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	
+	// https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-netflix-zuul
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-netflix-zuul', version: '2.2.10.RELEASE'
+
+	// https://mvnrepository.com/artifact/org.springframework.data/spring-data-cassandra
+	implementation group: 'org.springframework.data', name: 'spring-data-cassandra', version: '4.2.3'
+
+	// https://mvnrepository.com/artifact/com.stripe/stripe-java
+	implementation group: 'com.stripe', name: 'stripe-java', version: '24.17.0-beta.1'
+
+	// https://mvnrepository.com/artifact/org.apache.kafka/kafka
+	implementation group: "org.apache.kafka", name: 'kafka_2.13', version: '3.6.1'
+
+	// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
+	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
