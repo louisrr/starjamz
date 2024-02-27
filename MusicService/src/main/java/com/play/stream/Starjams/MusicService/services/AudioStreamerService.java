@@ -14,14 +14,14 @@ import java.util.UUID;
 
 import static org.apache.kafka.common.utils.Sanitizer.sanitize;
 
-public class GStreamerStreamer {
+public class AudioStreamerService {
     private Pipeline pipeline;
     private boolean saveStream;
     private String outputFilePath;
     private AmazonS3 s3client;
     private final CqlSession cqlSession;
 
-    public GStreamerStreamer(String sourceUrl, boolean saveStream, CqlSession session) {
+    public AudioStreamerService(String sourceUrl, boolean saveStream, CqlSession session) {
         this.saveStream = saveStream;
         this.cqlSession = session;
         if (saveStream) {
@@ -32,7 +32,7 @@ public class GStreamerStreamer {
             String query = "INSERT INTO save_audio_streams (id, audio_string, created_at) VALUES (uuid(), 'Your text string here', toTimestamp(now()));\n";
             ResultSet resultSet = cqlSession.execute(query, sanitize(query));
         }
-        Gst.init("GStreamerStreamer");
+        Gst.init("AudioStreamerService");
         setupPipeline(sourceUrl);
     }
 
