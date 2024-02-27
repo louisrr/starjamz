@@ -1,4 +1,4 @@
-package com.play.stream.MusicService;
+package com.play.stream.Starjams.MusicService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

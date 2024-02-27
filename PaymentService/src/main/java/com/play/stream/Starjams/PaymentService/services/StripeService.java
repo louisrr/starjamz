@@ -1,5 +1,7 @@
-package com.play.stream.Starjams.PaymentService;
+package com.play.stream.Starjams.PaymentService.services;
 
+import com.play.stream.Starjams.PaymentService.services.PaymentRecord;
+import com.play.stream.Starjams.PaymentService.services.PaymentRecordRepository;
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;

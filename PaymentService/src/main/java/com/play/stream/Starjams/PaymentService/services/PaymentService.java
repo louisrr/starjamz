@@ -1,4 +1,4 @@
-package com.play.stream.Starjams.PaymentService;
+package com.play.stream.Starjams.PaymentService.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

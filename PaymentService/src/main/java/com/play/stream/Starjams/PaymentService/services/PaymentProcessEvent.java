@@ -1,4 +1,4 @@
-package com.play.stream.Starjams.PaymentService;
+package com.play.stream.Starjams.PaymentService.services;
 
 import org.springframework.context.ApplicationEvent;
 

@@ -1,4 +1,4 @@
-package com.play.stream.Starjams.PaymentService;
+package com.play.stream.Starjams.PaymentService.services;
 
 import com.sendgrid.*;
 import com.sendgrid.helpers.mail.Mail;

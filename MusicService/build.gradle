@@ -44,6 +44,14 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
 	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
 
+	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
+	implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.666'
+
+	// https://mvnrepository.com/artifact/com.datastax.cassandra/cassandra-driver-core
+	implementation group: 'com.datastax.cassandra', name: 'cassandra-driver-core', version: '4.0.0', ext: 'pom'
+
+	// https://mvnrepository.com/artifact/org.freedesktop.gstreamer/gst1-java-core
+	implementation group: 'org.freedesktop.gstreamer', name: 'gst1-java-core', version: '1.4.0'
 }
 
 tasks.named('test') {
