@@ -14,11 +14,11 @@ import java.util.UUID;
 
 import static org.apache.kafka.common.utils.Sanitizer.sanitize;
 
-public class AudioStreamerService {
-    private Pipeline pipeline;
+public abstract class AudioStreamerService {
+    Pipeline pipeline;
     private boolean saveStream;
-    private String outputFilePath;
-    private AmazonS3 s3client;
+    String outputFilePath;
+    AmazonS3 s3client;
     private final CqlSession cqlSession;
 
     public AudioStreamerService(String sourceUrl, boolean saveStream, CqlSession session) {
