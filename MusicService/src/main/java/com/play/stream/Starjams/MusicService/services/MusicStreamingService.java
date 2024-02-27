@@ -11,6 +11,8 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static org.apache.kafka.common.utils.Sanitizer.sanitize;
+
 @Service
 public class MusicStreamingService {
 
@@ -23,14 +25,14 @@ public class MusicStreamingService {
     }
 
     public Resource loadAudioAsResource(String filename) {
-        String sanitizedFilename = sanitize(filename);
+        String sanitize = sanitize(filename);
 
         // Query ScyllaDB for the audio file path
         String query = "SELECT file_path FROM audio_assets WHERE file_name = ?;";
-        ResultSet resultSet = session.execute(query, sanitizedFilename);
+        ResultSet resultSet = session.execute(query, sanitize);
         Row row = resultSet.one();
         if (row == null) {
-            throw new RuntimeException("File not found: " + sanitizedFilename);
+            throw new RuntimeException("File not found: " + sanitize);
         }
 
         String filePath = row.getString("file_path");
@@ -46,10 +48,5 @@ public class MusicStreamingService {
         } catch (MalformedURLException e) {
             throw new RuntimeException("Error: " + e.getMessage());
         }
-    }
-
-    private String sanitize(String param) {
-        // Basic sanitization. Consider using a library or more complex logic as needed.
-        return param.replaceAll("[^a-zA-Z0-9.\\-_]", "");
     }
 }
