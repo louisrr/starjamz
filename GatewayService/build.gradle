@@ -44,6 +44,10 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
 	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
 
+	// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
+	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.1.2'
+
+
 }
 
 tasks.named('test') {
