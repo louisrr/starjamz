@@ -1,0 +1,73 @@
+/* login.module.css */
+
+.container {
+  background-color: #dffd83; /* Green background */
+  min-height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar {
+  background-color: #000000; /* Black background */
+  height: 45px; /* 45 pixels tall */
+  width: 100%; /* Full width */
+  margin: 0;
+  padding: 0;
+  position: relative; /* Non-floating */
+}
+
+.loginBox {
+  background-color: #333333; /* Dark grey box */
+  border-radius: 10px; /* Rounded edges */
+  padding: 20px;
+  margin-top: 100px; /* Adjust as needed for your layout */
+  width: 300px; /* Adjust as needed for your layout */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: adds a shadow for depth */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loginTitle {
+  color: white;
+  margin: 0 0 1em 0; /* Spacing below the title */
+  font-weight: bold;
+  font-size: 1em; /* Adjust as needed */
+}
+
+.inputGroup {
+  margin-bottom: 15px; /* Spacing between input groups */
+  width: 100%; /* Full width of the login box */
+}
+
+.inputGroup label {
+  color: white; /* White text for labels */
+}
+
+.inputGroup input {
+  width: 100%; /* Full width of the input group */
+  padding: 10px;
+  margin-top: 5px; /* Spacing between label and input field */
+  border: none;
+  border-radius: 5px; /* Rounded edges for input fields */
+}
+
+.loginButton {
+  background-color: #222; /* Slightly darker grey for the button */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em; /* Adjust as needed */
+  font-weight: bold;
+  width: 100%; /* Full width of the input group */
+}
+
+.loginButton:hover {
+  background-color: #444; /* Button color change on hover */
+}
