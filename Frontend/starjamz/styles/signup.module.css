@@ -1,0 +1,77 @@
+/* signup.module.css */
+
+.container {
+  background-color: #dffd83; /* Green background */
+  min-height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar {
+  background-color: #000000; /* Black background */
+  height: 45px; /* 45 pixels tall */
+  width: 100%; /* Full width */
+  margin: 0;
+  padding: 0;
+  position: relative; /* Non-floating */
+}
+
+.signupBox {
+  background-color: #333333; /* Dark grey box */
+  border-radius: 10px; /* Rounded edges */
+  width: 40%; /* 40% of the width of the screen */
+  padding: 20px;
+  margin-top: 50px; /* Adjust as needed for your layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.inputGroup {
+  margin-bottom: 15px; /* Spacing between input groups */
+  width: 100%; /* Full width of the signup box */
+}
+
+.inputGroup label {
+  color: white; /* White text for labels */
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.8em;
+  display: block; /* Ensure the label is on a new line */
+}
+
+.inputGroup input {
+  width: 100%; /* Full width of the input group */
+  padding: 10px;
+  margin-top: 5px; /* Spacing between label and input field */
+  border: none;
+  border-radius: 5px; /* Rounded edges for input fields */
+}
+
+.submit-button {
+  background-color: #4CAF50; /* Green background */
+  border: none; /* No border */
+  color: white; /* White text */
+  padding: 16px 32px; /* Padding around the text */
+  text-align: center; /* Center the text */
+  text-decoration: none; /* No underline */
+  display: inline-block; /* Allow setting width and height */
+  font-size: 16px; /* Size of the text */
+  font-weight: bold; /* Bold text */
+  margin: 4px 2px; /* Margin around the button */
+  cursor: pointer; /* Pointer cursor on hover */
+  border-radius: 50px; /* Rounded edges */
+  transition-duration: 0.4s; /* Smooth transition for hover and click effects */
+  width: 100%; /* Full width of the input group */
+}
+
+.submit-button:hover {
+  background-color: #dfff83; /* Light green background on hover */
+}
+
+.submit-button:active {
+  background-color: #adff2f; /* Lighter green background when clicked */
+}
