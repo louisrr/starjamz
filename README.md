@@ -1,6 +1,6 @@
 # starjamz
 Cloud-based music platform
-Note: still under development. email mailto:ruezde@gmail.com for questions
+Note: still under development. email ruezde@gmail.com for questions
 
 ## Not Just Music Orientation
 Starjamz is designed to go far beyond a typical music streaming service. 
