@@ -48,3 +48,30 @@ Starjamz is designed to go far beyond a typical music streaming service.
 
 ## Architecture
 Starjamz employs an architecture based on microservices that run, and can be scaled, independently of each other. 
+
+## Getting the app running locally
+
+Right now, the repo is **not a one-command startup**. To run it successfully, you need to provide missing infrastructure and a few config fixes.
+
+### 1) Use Java 17 for all Gradle builds
+All services target Java 17, so use JDK 17 when running Gradle.
+
+### 2) Bring up required infrastructure first
+The services are configured to expect these dependencies:
+- **Eureka server** at `http://localhost:8761/eureka/`
+- **Kafka** broker at `127.0.0.1:9092`
+- **Redis** at `localhost:6379`
+
+### 3) Set real secrets (or disable integrations while developing)
+Default properties use placeholder values for Stripe and SendGrid. Replace them before testing payment/email flows.
+
+### 4) Start backend services
+You can start each service with Gradle from its folder (`GatewayService`, `PaymentService`, `MusicService`, etc.).
+
+### 5) Start frontend
+From `Frontend/starjamz`, install dependencies and run the Next.js app.
+
+### Known repository gaps
+- No Eureka server service/module is included in this repository.
+- The docker compose file is for backend services only and does not include Eureka/Kafka/Redis.
+- Gateway routes are discovery-driven, so service registration needs to be working before gateway endpoints resolve.
