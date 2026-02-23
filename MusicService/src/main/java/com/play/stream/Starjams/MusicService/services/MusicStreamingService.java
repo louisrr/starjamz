@@ -3,9 +3,14 @@ package com.play.stream.Starjams.MusicService.services;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
+import com.play.stream.Starjams.MusicService.models.Stream;
+import com.play.stream.Starjams.MusicService.repository.StreamRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -19,9 +24,18 @@ public class MusicStreamingService {
     private final Path rootLocation;
     private final CqlSession session;
 
+    @Autowired
+    private StreamRepository streamRepository; // This is a hypothetical repository interfacing with ScyllaDB
+
     public MusicStreamingService(CqlSession session, String pathToFiles) {
         this.session = session;
         this.rootLocation = Paths.get(pathToFiles);
+    }
+
+    public String findStreamUrlByStreamId(String streamId) {
+        Stream stream = streamRepository.findByStreamId(streamId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stream not found"));
+        return stream.getUrl();  // Assuming there's a getUrl method in the Stream entity
     }
 
     public Resource loadAudioAsResource(String filename) {

@@ -29,7 +29,7 @@ public class VideoStreamModelTest {
         List<String> cast = Arrays.asList("Actor 1", "Actor 2");
         String language = "English";
 
-        VideoStreamModel model = new VideoStreamModel();
+        VideoStream model = new VideoStream();
         model.setStreamId(streamId);
         model.setVideoId(videoId);
         model.setVideoUrl(videoUrl);
@@ -67,11 +67,11 @@ public class VideoStreamModelTest {
 
     @Test
     public void testVideoStreamModelEquality() {
-        VideoStreamModel model1 = new VideoStreamModel();
+        VideoStream model1 = new VideoStream();
         model1.setStreamId(UUID.randomUUID());
         model1.setTitle("Test Video");
 
-        VideoStreamModel model2 = new VideoStreamModel();
+        VideoStream model2 = new VideoStream();
         model2.setStreamId(model1.getStreamId());
         model2.setTitle(model1.getTitle());
 
@@ -84,7 +84,7 @@ public class VideoStreamModelTest {
 
     @Test
     public void testVideoStreamModelToString() {
-        VideoStreamModel model = new VideoStreamModel();
+        VideoStream model = new VideoStream();
         model.setTitle("Test Video");
         String toStringResult = model.toString();
         assert(toStringResult.contains("Test Video")); // Simple check to ensure toString includes part of the state

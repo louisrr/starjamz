@@ -13,16 +13,16 @@ import org.springframework.web.server.ResponseStatusException;
 import com.play.stream.Starjams.MusicService.services.MusicStreamingService;
 
 @RestController
-public class MusicStreamingController {
+public class MusicStreamController {
 
     private final MusicStreamingService musicStreamingService;
 
     @Autowired
-    public MusicStreamingController(MusicStreamingService musicStreamingService) {
+    public MusicStreamController(MusicStreamingService musicStreamingService) {
         this.musicStreamingService = musicStreamingService;
     }
 
-    @GetMapping("/stream/{filename}")
+    @GetMapping("/stream/audio/{streamId}")
     public ResponseEntity<Resource> streamAudio(@PathVariable String filename) {
         try {
             Resource file = musicStreamingService.loadAudioAsResource(filename);

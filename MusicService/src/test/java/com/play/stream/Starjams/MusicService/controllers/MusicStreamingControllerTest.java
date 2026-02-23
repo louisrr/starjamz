@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.containsString;
 import com.play.stream.Starjams.MusicService.services.MusicStreamingService;
 import org.springframework.web.server.ResponseStatusException;
 
-@WebMvcTest(MusicStreamingController.class)
+@WebMvcTest(MusicStreamController.class)
 public class MusicStreamingControllerTest {
 
     @Autowired

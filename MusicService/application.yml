@@ -14,3 +14,9 @@ eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka/
+
+
+  spring.data.cassandra.keyspace-name=music_service
+  spring.data.cassandra.contact-points=localhost
+  spring.data.cassandra.port=9042
+  spring.data.cassandra.schema-action=create_if_not_exists

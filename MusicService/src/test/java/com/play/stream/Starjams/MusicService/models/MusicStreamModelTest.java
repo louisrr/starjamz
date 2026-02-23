@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MusicStreamModelTest {
 
-    private MusicStreamModel musicStreamModel;
+    private Stream musicStreamModel;
     private final UUID streamId = UUID.randomUUID();
     private final UUID trackId = UUID.randomUUID();
     private final String trackUrl = "http://example.com/track";
@@ -30,7 +30,7 @@ public class MusicStreamModelTest {
 
     @BeforeEach
     void setUp() {
-        musicStreamModel = new MusicStreamModel();
+        musicStreamModel = new Stream();
         musicStreamModel.setStreamId(streamId);
         musicStreamModel.setTrackId(trackId);
         musicStreamModel.setTrackUrl(trackUrl);
@@ -51,7 +51,7 @@ public class MusicStreamModelTest {
     void testGettersAndSetters() {
         assertEquals(streamId, musicStreamModel.getStreamId());
         assertEquals(trackId, musicStreamModel.getTrackId());
-        assertEquals(trackUrl, musicStreamModel.getTrackUrl());
+        assertEquals(trackUrl, musicStreamModel.getUrl());
         assertEquals(title, musicStreamModel.getTitle());
         assertEquals(artist, musicStreamModel.getArtist());
         assertEquals(album, musicStreamModel.getAlbum());

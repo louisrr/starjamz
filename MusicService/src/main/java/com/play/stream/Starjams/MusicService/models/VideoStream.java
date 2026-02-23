@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class VideoStreamModel {
+public class VideoStream {
 
     @PrimaryKey
     private UUID streamId; // Unique identifier for the video stream
@@ -191,8 +191,8 @@ public class VideoStreamModel {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof VideoStreamModel)) return false;
-        VideoStreamModel that = (VideoStreamModel) o;
+        if (!(o instanceof VideoStream)) return false;
+        VideoStream that = (VideoStream) o;
         return Objects.equal(getStreamId(), that.getStreamId()) && Objects.equal(getVideoId(), that.getVideoId()) && Objects.equal(getVideoUrl(), that.getVideoUrl()) && Objects.equal(getTitle(), that.getTitle()) && Objects.equal(getDirector(), that.getDirector()) && Objects.equal(getProductionHouse(), that.getProductionHouse()) && Objects.equal(getGenre(), that.getGenre()) && Objects.equal(getDuration(), that.getDuration()) && Objects.equal(getStreamUrl(), that.getStreamUrl()) && Objects.equal(getThumbnailUrl(), that.getThumbnailUrl()) && Objects.equal(getReleaseDate(), that.getReleaseDate()) && Objects.equal(getQuality(), that.getQuality()) && Objects.equal(getTags(), that.getTags()) && Objects.equal(getLicense(), that.getLicense()) && Objects.equal(getCast(), that.getCast()) && Objects.equal(getLanguage(), that.getLanguage());
     }
 
@@ -203,7 +203,7 @@ public class VideoStreamModel {
 
     @Override
     public String toString() {
-        return "VideoStreamModel{" +
+        return "VideoStream{" +
                 "streamId=" + streamId +
                 ", videoId=" + videoId +
                 ", videoUrl='" + videoUrl + '\'' +

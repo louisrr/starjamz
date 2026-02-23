@@ -47,7 +47,10 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
 	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.1.2'
 
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	// https://mvnrepository.com/artifact/io.helidon.webclient/helidon-webclient
+	testImplementation group: 'io.helidon.webclient', name: 'helidon-webclient', version: '4.0.8'
 }
 
 tasks.named('test') {

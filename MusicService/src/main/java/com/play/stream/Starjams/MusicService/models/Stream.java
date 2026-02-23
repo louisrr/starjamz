@@ -2,12 +2,14 @@ package com.play.stream.Starjams.MusicService.models;
 
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
+import org.springframework.data.cassandra.core.mapping.Table;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-public class MusicStreamModel {
+@Table("streams")
+public class Stream {
 
     @PrimaryKey
     private UUID streamId;
@@ -16,7 +18,7 @@ public class MusicStreamModel {
     private UUID trackId;
 
     @Column
-    private String trackUrl;
+    private String url;
 
     @Column
     private String title;
@@ -51,6 +53,10 @@ public class MusicStreamModel {
     @Column
     private String license;
 
+    // Constructors, getters, and setters
+    public Stream() {
+    }
+
     public UUID getStreamId() {
         return streamId;
     }
@@ -59,7 +65,7 @@ public class MusicStreamModel {
         return trackId;
     }
 
-    public String getTrackUrl() {
+    public String getUrl() {
         return trackUrl;
     }
 

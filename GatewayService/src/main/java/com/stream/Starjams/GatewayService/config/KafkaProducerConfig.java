@@ -1,4 +1,4 @@
-package com.play.stream.Starjams.GatewayService.config;
+package com.stream.Starjams.GatewayService.config;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

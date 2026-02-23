@@ -1,4 +1,4 @@
-package com.play.stream.Starjams.GatewayService.config;
+package com.stream.Starjams.GatewayService.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
