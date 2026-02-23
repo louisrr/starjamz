@@ -47,6 +47,12 @@ spring:
             - Path=/like/**
           filters:
             - StripPrefix=1
+        - id: playlist-service
+          uri: lb://playlist-service
+          predicates:
+            - Path=/playlist/**
+          filters:
+            - StripPrefix=1
 
   loadbalancer:
     ribbon:
