@@ -4,6 +4,7 @@ import com.stream.Starjams.GatewayService.config.WebClientConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -32,7 +33,7 @@ public class GatewayService {
     }
 
 
-    /**
+
     public ResponseEntity<?> fetchPlaylists() {
         // Suppose you fetch data from another microservice or a database
         List<Playlist> playlists = someRepository.findByUserId();
@@ -44,5 +45,5 @@ public class GatewayService {
 
     public ResponseEntity<?> createPlaylist(@RequestBody Object playlistDetails {
         webClientConfig.webClient(playlistDetails);
-    }*/
+    }
 }
