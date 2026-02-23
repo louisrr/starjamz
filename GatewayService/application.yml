@@ -2,14 +2,56 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: gateway-service
   cloud:
     gateway:
       discovery:
         locator:
           enabled: true
-    loadbalancer:
-      ribbon:
-        enabled: false
+          lower-case-service-id: true
+      routes:
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/payment/**
+          filters:
+            - StripPrefix=1
+        - id: music-service
+          uri: lb://music-service
+          predicates:
+            - Path=/music/**
+          filters:
+            - StripPrefix=1
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/admin/**
+          filters:
+            - StripPrefix=1
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**
+          filters:
+            - StripPrefix=1
+        - id: feed-service
+          uri: lb://feed-service
+          predicates:
+            - Path=/feed/**
+          filters:
+            - StripPrefix=1
+        - id: like-service
+          uri: lb://like-service
+          predicates:
+            - Path=/like/**
+          filters:
+            - StripPrefix=1
+
+  loadbalancer:
+    ribbon:
+      enabled: false
+
 eureka:
   client:
     serviceUrl:

@@ -2,12 +2,10 @@ server:
   port: 8080
 
 spring:
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-    loadbalancer:
-      ribbon:
-        enabled: false
+  application:
+    name: like-service
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
