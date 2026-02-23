@@ -1,49 +1,31 @@
 package com.play.stream.Starjams.GatewayService.Services;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.stereotype.Service;
 import com.datastax.oss.driver.api.core.cql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.Properties;
-
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
 
 @Service
 public class KafkaPublisherService {
 
-    @Autowired
-    private Producer<String, String> producer;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper mapper;
 
-    public KafkaPublisherService() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-
-        this.producer = new KafkaProducer<>(props);
+    public KafkaPublisherService(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper mapper) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.mapper = mapper;
     }
 
     public void publishScyllaDbResultsToKafka(ResultSet resultSet, String topicName) {
-        ObjectMapper mapper = new ObjectMapper();
-
         for (Row row : resultSet) {
             try {
-                String message = mapper.writeValueAsString(row); // Simplifying conversion
-                producer.send(new ProducerRecord<>(topicName, message));
+                String message = mapper.writeValueAsString(row.getFormattedContents());
+                kafkaTemplate.send(new ProducerRecord<>(topicName, message));
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new IllegalStateException("Failed to publish Scylla row to Kafka", e);
             }
-        }
-    }
-
-    // Ensure to close the producer to free resources
-    public void closeProducer() {
-        if (producer != null) {
-            producer.close();
         }
     }
 }
