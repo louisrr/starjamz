@@ -2,14 +2,9 @@ server:
   port: 8080
 
 spring:
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-    loadbalancer:
-      ribbon:
-        enabled: false
+  application:
+    name: music-service
+
 eureka:
   client:
     serviceUrl:
