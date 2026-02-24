@@ -1,15 +1,19 @@
 package com.play.stream.Starjams.GatewayService.controllers;
 
 import com.play.stream.Starjams.GatewayService.services.GatewayService;
-import org.springframework.http.HttpStatus;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.util.Enumeration;
 
 @RestController
-@RequestMapping("/gateway/playlists")
+@RequestMapping("/gateway")
 public class PlaylistGatewayController {
+
+    private static final String GATEWAY_PREFIX = "/gateway/";
 
     private final GatewayService gatewayService;
 
@@ -17,18 +21,38 @@ public class PlaylistGatewayController {
         this.gatewayService = gatewayService;
     }
 
-    @GetMapping
-    public ResponseEntity<String> getAllPlaylists() {
-        return ResponseEntity.ok(gatewayService.getAllPlaylists());
-    }
+    @RequestMapping(value = "/{service}/**", method = {
+            RequestMethod.GET,
+            RequestMethod.POST,
+            RequestMethod.PUT,
+            RequestMethod.PATCH,
+            RequestMethod.DELETE
+    })
+    public ResponseEntity<String> proxyRequest(
+            @PathVariable String service,
+            HttpMethod method,
+            HttpServletRequest request,
+            @RequestBody(required = false) String body) {
 
-    @GetMapping("/{playlistId}")
-    public ResponseEntity<String> getPlaylistById(@PathVariable String playlistId) {
-        return ResponseEntity.ok(gatewayService.getPlaylistById(playlistId));
-    }
+        String requestUri = request.getRequestURI();
+        String servicePrefix = GATEWAY_PREFIX + service;
+        String path = requestUri.startsWith(servicePrefix)
+                ? requestUri.substring(servicePrefix.length())
+                : "/";
 
-    @PostMapping
-    public ResponseEntity<String> createPlaylist(@RequestBody Map<String, Object> payload) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(gatewayService.createPlaylist(payload));
+        HttpHeaders headers = new HttpHeaders();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            headers.add(headerName, request.getHeader(headerName));
+        }
+
+        return gatewayService.proxyRequest(
+                service,
+                method,
+                path,
+                request.getQueryString(),
+                headers,
+                body);
     }
 }
