@@ -1,4 +1,4 @@
-package com.play.stream.Starjams.GatewayService.services;
+package com.play.stream.Starjams.GatewayService.Services;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
