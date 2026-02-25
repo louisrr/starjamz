@@ -1,6 +1,6 @@
 package com.play.stream.Starjams.GatewayService.controllers;
 
-import com.play.stream.Starjams.GatewayService.services.GatewayService;
+import com.play.stream.Starjams.GatewayService.Services.GatewayService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
