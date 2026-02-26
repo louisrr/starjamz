@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.play'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
+description = 'Media streaming microservice for Spring Boot'
 
 java {
 	toolchain {
