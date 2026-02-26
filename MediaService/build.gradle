@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.play'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Spring Boot'
+description = 'Media streaming microservice for Spring Boot'
 
 java {
 	toolchain {
@@ -20,6 +20,17 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+
+	// https://mvnrepository.com/artifact/com.stripe/stripe-java
+	implementation group: 'com.stripe', name: 'stripe-java', version: '24.17.0-beta.1'
+
+	// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
+	implementation group: 'org.springframework.kafka', name: 'spring-kafka', version: '3.1.2'
+
+	// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
+	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
