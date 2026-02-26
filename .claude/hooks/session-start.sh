@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+# Only run in remote (Claude Code on the web) environment
+if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
+  exit 0
+fi
+
+# Install frontend dependencies (Next.js, ESLint, TypeScript, etc.)
+echo "Installing frontend dependencies..."
+cd "$CLAUDE_PROJECT_DIR/Frontend/starjamz"
+npm install
+
+echo "Session setup complete."
