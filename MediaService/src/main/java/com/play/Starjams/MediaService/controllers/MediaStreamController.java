@@ -77,7 +77,6 @@ public class MediaStreamController {
 
     /**
      * Creates and immediately starts a new stream session.
-     *
      * @return session metadata including the URL to use for playback
      */
     @PostMapping

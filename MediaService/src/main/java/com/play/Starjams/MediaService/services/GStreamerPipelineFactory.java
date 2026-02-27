@@ -67,10 +67,12 @@ public class GStreamerPipelineFactory {
             if (caps != null && caps.toString().contains("audio")) {
                 Pad sinkPad = audioconvert.getStaticPad("sink");
                 if (!sinkPad.isLinked()) {
-                    PadLinkReturn ret = pad.link(sinkPad);
-                    if (ret != PadLinkReturn.OK) {
-                        log.warn("[{}] Audio pad link returned: {}", session.getId(), ret);
+                    try {
+                        pad.link(sinkPad);
+                    } catch (Exception e) {
+                        log.warn("[{}] Video pad link returned: {}", session.getId(), e.getMessage());
                     }
+
                 }
             }
         });
@@ -131,18 +133,22 @@ public class GStreamerPipelineFactory {
             if (capsStr.contains("video")) {
                 Pad sinkPad = videoconvert.getStaticPad("sink");
                 if (!sinkPad.isLinked()) {
-                    PadLinkReturn ret = pad.link(sinkPad);
-                    if (ret != PadLinkReturn.OK) {
-                        log.warn("[{}] Video pad link returned: {}", session.getId(), ret);
+                    try {
+                        pad.link(sinkPad);
+                    } catch (Exception e) {
+                        log.warn("[{}] Video pad link returned: {}", session.getId(), e.getMessage());
                     }
+
                 }
             } else if (capsStr.contains("audio")) {
                 Pad sinkPad = audioconvert.getStaticPad("sink");
                 if (!sinkPad.isLinked()) {
-                    PadLinkReturn ret = pad.link(sinkPad);
-                    if (ret != PadLinkReturn.OK) {
-                        log.warn("[{}] Audio pad link returned: {}", session.getId(), ret);
+                    try {
+                        pad.link(sinkPad);
+                    } catch (Exception e) {
+                        log.warn("[{}] Video pad link returned: {}", session.getId(), e.getMessage());
                     }
+
                 }
             }
         });
