@@ -20,7 +20,16 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+
+	// GStreamer Java bindings (wraps native GStreamer 1.x via JNA)
+	// https://mvnrepository.com/artifact/org.freedesktop.gstreamer/gst1-java-core
+	implementation 'org.freedesktop.gstreamer:gst1-java-core:1.4.0'
+
+	// H2 in-memory DB for JPA / dev — swap for PostgreSQL in production
+	runtimeOnly 'com.h2database:h2'
 
 	// https://mvnrepository.com/artifact/com.stripe/stripe-java
 	implementation group: 'com.stripe', name: 'stripe-java', version: '24.17.0-beta.1'
