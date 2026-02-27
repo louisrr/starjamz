@@ -25,7 +25,7 @@ Starjamz is designed to go far beyond a typical music streaming service.
 - **Merchandise Sales:** Selling event-related apparel and merchandise directly through the app can add an additional revenue source.
 
 ### Fitness and Wellness Industry
-- **Workout and Yoga Classes:** Instructors can live stream classes, allowing them to reach a broader audience beyond geographical limitations.
+- **Workout and Yoga Classes:** Instructors can live-stream classes, allowing them to reach a broader audience beyond geographical limitations.
 - **Subscription Models:** Monthly subscription models can be employed for access to exclusive workout routines, diet plans, or wellness content.
 
 
@@ -53,8 +53,8 @@ Starjamz employs an architecture based on microservices that run, and can be sca
 
 Right now, the repo is **not a one-command startup**. To run it successfully, you need to provide missing infrastructure and a few config fixes.
 
-### 1) Use Java 17 for all Gradle builds
-All services target Java 17, so use JDK 17 when running Gradle.
+### 1) Use Java 21 for all Gradle builds
+All services target Java 21, so use JDK 21 when running Gradle.
 
 ### 2) Bring up required infrastructure first
 The services are configured to expect these dependencies:
@@ -73,5 +73,5 @@ From `Frontend/starjamz`, install dependencies and run the Next.js app.
 
 ### Known repository gaps
 - No Eureka server service/module is included in this repository.
-- The docker compose file is for backend services only and does not include Eureka/Kafka/Redis.
+- The Docker Compose file is for backend services only and does not include Eureka/Kafka/Redis.
 - Gateway routes are discovery-driven, so service registration needs to be working before gateway endpoints resolve.
