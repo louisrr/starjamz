@@ -1,10 +1,14 @@
 package com.play.Starjams.MediaService.models;
 
 import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.cassandra.core.mapping.Column;
+import org.springframework.data.cassandra.core.mapping.Table;
+
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "media_files")
+
+@Table("media_files")
 public class MediaFile {
 
     @Id
