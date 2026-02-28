@@ -1,27 +1,35 @@
 package com.play.Starjams.MediaService.models;
 
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import org.springframework.data.cassandra.core.mapping.*;
+import java.time.Instant;
+import java.util.UUID;
 
-@Entity
-@Table(name = "media_files")
+@Table("media_files")
 public class MediaFile {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @PrimaryKey
+    private UUID id;
 
-    @Column(nullable = false)
-    private String filename;
+    @Column("filename")
+    private String filename;         // no nullable constraint — enforce in service layer
 
+    @Column("content_type")
     private String contentType;
-    private String storagePath;
-    private Long fileSize;
-    private String uploadedBy;
-    private LocalDateTime uploadedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Column("storage_path")
+    private String storagePath;
+
+    @Column("file_size")
+    private Long fileSize;
+
+    @Column("uploaded_by")
+    private String uploadedBy;
+
+    @Column("uploaded_at")
+    private Instant uploadedAt;
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
     public String getFilename() { return filename; }
     public void setFilename(String filename) { this.filename = filename; }
@@ -38,6 +46,6 @@ public class MediaFile {
     public String getUploadedBy() { return uploadedBy; }
     public void setUploadedBy(String uploadedBy) { this.uploadedBy = uploadedBy; }
 
-    public LocalDateTime getUploadedAt() { return uploadedAt; }
-    public void setUploadedAt(LocalDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
+    public Instant getUploadedAt() { return uploadedAt; }
+    public void setUploadedAt(Instant uploadedAt) { this.uploadedAt = uploadedAt; }
 }

@@ -72,6 +72,7 @@ public class GStreamerPipelineFactory {
                     } catch (Exception e) {
                         log.warn("[{}] Audio pad link returned: {}", session.getId(), e.getMessage());
                     }
+
                 }
             }
         });
@@ -137,6 +138,7 @@ public class GStreamerPipelineFactory {
                     } catch (Exception e) {
                         log.warn("[{}] Video pad link returned: {}", session.getId(), e.getMessage());
                     }
+
                 }
             } else if (capsStr.contains("audio")) {
                 Pad sinkPad = audioconvert.getStaticPad("sink");
@@ -146,6 +148,7 @@ public class GStreamerPipelineFactory {
                     } catch (Exception e) {
                         log.warn("[{}] Audio pad link returned: {}", session.getId(), e.getMessage());
                     }
+
                 }
             }
         });
