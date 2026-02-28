@@ -40,6 +40,12 @@ services:
       scylla-init:
         condition: service_completed_successfully
 
+  # ── Frontend ──────────────────────────────────────────────────────────────────
+  frontend:
+    build: ./Frontend/starjamz
+    ports:
+      - "3000:3000"
+
   # ── ScyllaDB ─────────────────────────────────────────────────────────────────
   scylla:
     image: scylladb/scylla:5.4
