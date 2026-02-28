@@ -1,8 +1,11 @@
 package com.play.stream.Starjams.UploadService.services;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.Upload;
 import com.play.stream.Starjams.UploadService.models.UploadMediaType;
 import com.play.stream.Starjams.UploadService.models.UploadRecord;
 import com.play.stream.Starjams.UploadService.repositories.UploadRecordRepository;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Set;
@@ -33,11 +37,14 @@ public class UploadServiceImpl implements UploadService {
     private String bucket;
 
     private final AmazonS3 s3;
+    private final TransferManager transferManager;
     private final UploadRecordRepository repository;
     private final UploadEventPublisher eventPublisher;
 
-    public UploadServiceImpl(AmazonS3 s3, UploadRecordRepository repository, UploadEventPublisher eventPublisher) {
+    public UploadServiceImpl(AmazonS3 s3, TransferManager transferManager,
+                             UploadRecordRepository repository, UploadEventPublisher eventPublisher) {
         this.s3 = s3;
+        this.transferManager = transferManager;
         this.repository = repository;
         this.eventPublisher = eventPublisher;
     }
@@ -65,13 +72,26 @@ public class UploadServiceImpl implements UploadService {
 
     private UploadRecord store(MultipartFile file, String uploadedBy, UploadMediaType mediaType, String prefix) throws IOException {
         String uploadId = UUID.randomUUID().toString();
-        String s3Key = prefix + "/" + uploadId + "/" + file.getOriginalFilename();
+        String safeName = sanitizeFileName(file.getOriginalFilename());
+        String s3Key = prefix + "/" + uploadId + "/" + safeName;
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
-        s3.putObject(new PutObjectRequest(bucket, s3Key, file.getInputStream(), metadata));
+        // TransferManager switches to multipart upload automatically above 16 MB,
+        // which is required for large video files and significantly faster for audio.
+        try {
+            Upload upload = transferManager.upload(
+                    new PutObjectRequest(bucket, s3Key, file.getInputStream(), metadata));
+            upload.waitForCompletion();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Upload interrupted", e);
+        } catch (AmazonClientException e) {
+            throw new IOException("S3 upload failed: " + e.getMessage(), e);
+        }
+
         String s3Url = s3.getUrl(bucket, s3Key).toString();
 
         UploadRecord record = new UploadRecord();
@@ -86,6 +106,16 @@ public class UploadServiceImpl implements UploadService {
         record.setUploadedAt(LocalDateTime.now());
 
         return repository.save(record);
+    }
+
+    // Strip path components and replace non-safe characters so the S3 key
+    // cannot contain traversal sequences or characters that require URL encoding.
+    private String sanitizeFileName(String original) {
+        if (original == null || original.isBlank()) {
+            return "file";
+        }
+        String name = Paths.get(original).getFileName().toString();
+        return name.replaceAll("[^a-zA-Z0-9._-]", "_");
     }
 
     private void validateContentType(String contentType, Set<String> accepted, String label) {
