@@ -28,7 +28,8 @@ public class GatewayService {
             @Value("${music.service.base-url:lb://music-service}") String musicServiceBaseUrl,
             @Value("${payment.service.base-url:lb://payment-service}") String paymentServiceBaseUrl,
             @Value("${playlist.service.base-url:lb://playlist-service}") String playlistServiceBaseUrl,
-            @Value("${user.service.base-url:lb://user-service}") String userServiceBaseUrl) {
+            @Value("${user.service.base-url:lb://user-service}") String userServiceBaseUrl,
+            @Value("${upload.service.base-url:lb://upload-service}") String uploadServiceBaseUrl) {
         this.webClientBuilder = webClientBuilder;
         this.serviceBaseUrls = new HashMap<>();
         this.serviceBaseUrls.put("admin", adminServiceBaseUrl);
@@ -38,6 +39,7 @@ public class GatewayService {
         this.serviceBaseUrls.put("payment", paymentServiceBaseUrl);
         this.serviceBaseUrls.put("playlist", playlistServiceBaseUrl);
         this.serviceBaseUrls.put("user", userServiceBaseUrl);
+        this.serviceBaseUrls.put("upload", uploadServiceBaseUrl);
     }
 
     public ResponseEntity<String> proxyRequest(

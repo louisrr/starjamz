@@ -28,4 +28,8 @@ services:
   like-service:
     build: ./LikeService
     ports:
-      - "8086:8080"   
+      - "8086:8080"
+  upload-service:
+    build: ./UploadService
+    ports:
+      - "8087:8080"
