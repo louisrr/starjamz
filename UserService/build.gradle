@@ -37,12 +37,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
-	implementation 'com.datastax.oss:java-driver-core:4.13.0'
-	implementation 'com.datastax.astra:astra-spring-boot-starter:0.1.13'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-	// https://mvnrepository.com/artifact/org.springframework.data/spring-data-cassandra
-	implementation group: 'org.springframework.data', name: 'spring-data-cassandra', version: '4.2.3'
+	// Aerospike - system of engagement
+	implementation 'com.aerospike:aerospike-client:8.1.2'
+
+	// ClickHouse JDBC - system of record
+	implementation 'com.clickhouse:clickhouse-jdbc:0.6.5'
+	implementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
 
 	// https://mvnrepository.com/artifact/com.stripe/stripe-java
 	implementation group: 'com.stripe', name: 'stripe-java', version: '24.17.0-beta.1'
@@ -52,9 +54,6 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
 	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
-
-	// https://mvnrepository.com/artifact/com.datastax.oss/java-driver-core
-	implementation group: 'com.datastax.oss', name: 'java-driver-core', version: '4.17.0'
 }
 
 tasks.named('test') {

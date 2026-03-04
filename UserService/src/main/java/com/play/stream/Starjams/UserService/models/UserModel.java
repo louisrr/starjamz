@@ -1,62 +1,28 @@
 package com.play.stream.Starjams.UserService.models;
 
 import com.google.common.base.Objects;
-import org.springframework.data.annotation.Transient;
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 
 import java.util.Arrays;
 import java.util.UUID;
 
 public class UserModel {
 
-    @PrimaryKey
     private UUID u;
-
-    @Column
     private String screenName; // shown on the user page
-
-    @Column
-    private String userName; // shown in the URL
-
-    @Column
+    private String userName;   // shown in the URL
     private String email;
-
-    @Column
     private String emailHash;
-
-    @Column
     private String password;
-
-    @Column
     private String device;
-
-    @Column
     private String userAgent;
-
-    @Column
     private String url;
-
-    @Column
     private String aviAddress;
-
-    @Column
     private String coverAddress;
-
-    @Column
     private UUID lastMusicListen;
-
-    @Column
     private UUID lastAudioStream;
-
-    @Column
     private UUID lastVideoStream;
-
-    @Column
     private String bio;
-
-    @Transient
-    private double[] coords; // Geographic location, ScyllaDB coords tuple (lat/lon)
+    private double[] coords; // Geographic location (lat/lon)
 
     public UUID getU() {
         return u;
@@ -186,6 +152,10 @@ public class UserModel {
         this.coords = coords;
     }
 
+    public UUID getId() {
+        return u;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -219,9 +189,5 @@ public class UserModel {
                 ", bio='" + bio + '\'' +
                 ", coords=" + Arrays.toString(coords) +
                 '}';
-    }
-
-    public UUID getId() {
-        return u;
     }
 }
