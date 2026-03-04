@@ -1,10 +1,25 @@
 package com.play.stream.Starjams.UserService.services;
 
+import com.play.stream.Starjams.UserService.dto.SignupRequest;
+import com.play.stream.Starjams.UserService.dto.SignupResponse;
 import com.play.stream.Starjams.UserService.models.UserModel;
+
 import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService {
+
+    /**
+     * Full signup flow:
+     * validate → duplicate-check → hash password → store → send confirmation.
+     *
+     * @param request   email/phone + password
+     * @param ip        caller's IP address
+     * @param userAgent caller's User-Agent header
+     * @param hostname  reverse-DNS hostname of the caller (may equal ip if unavailable)
+     * @return SignupResponse with a message and, on success, the new user UUID
+     */
+    SignupResponse signup(SignupRequest request, String ip, String userAgent, String hostname);
 
     // Create a new user
     UserModel createUser(UserModel user);
@@ -19,13 +34,9 @@ public interface UserService {
     UserModel addAvatarAddress(UUID userId, String avatarAddress);
 
     // Change the email, if the user is logged in
-    // This operation typically involves more context about user session,
-    // which is not directly related to a database operation
     UserModel changeEmail(UUID userId, String newEmail);
 
     // Add a secondary email address
-    // Assuming there's a mechanism to distinguish primary and secondary emails,
-    // otherwise, it's just updating/adding another email field
     UserModel addSecondaryEmail(UUID userId, String secondaryEmail);
 
     // Add a bio
