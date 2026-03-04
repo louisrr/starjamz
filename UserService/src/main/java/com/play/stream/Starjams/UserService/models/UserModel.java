@@ -12,6 +12,7 @@ public class UserModel {
     private String userName;   // shown in the URL
     private String email;
     private String emailHash;
+    private String phoneNumber;
     private String password;
     private String device;
     private String userAgent;
@@ -23,6 +24,22 @@ public class UserModel {
     private UUID lastVideoStream;
     private String bio;
     private double[] coords; // Geographic location (lat/lon)
+
+    // Registration / analytics fields
+    private long signupTimestamp;  // epoch seconds
+    private long lastOnline;       // epoch seconds
+    private int following;
+    private int likes;
+    private int shares;
+    private String ipAddress;
+    private String hostname;
+    private String geolocation;
+    private int mostViewedGenre;
+    private int followerCount;
+    private Gender gender;
+
+    // Transient signup fields (not persisted long-term)
+    private boolean confirmed;
 
     public UUID getU() {
         return u;
@@ -151,6 +168,45 @@ public class UserModel {
     public void setCoords(double[] coords) {
         this.coords = coords;
     }
+
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
+
+    public long getSignupTimestamp() { return signupTimestamp; }
+    public void setSignupTimestamp(long signupTimestamp) { this.signupTimestamp = signupTimestamp; }
+
+    public long getLastOnline() { return lastOnline; }
+    public void setLastOnline(long lastOnline) { this.lastOnline = lastOnline; }
+
+    public int getFollowing() { return following; }
+    public void setFollowing(int following) { this.following = following; }
+
+    public int getLikes() { return likes; }
+    public void setLikes(int likes) { this.likes = likes; }
+
+    public int getShares() { return shares; }
+    public void setShares(int shares) { this.shares = shares; }
+
+    public String getIpAddress() { return ipAddress; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+
+    public String getHostname() { return hostname; }
+    public void setHostname(String hostname) { this.hostname = hostname; }
+
+    public String getGeolocation() { return geolocation; }
+    public void setGeolocation(String geolocation) { this.geolocation = geolocation; }
+
+    public int getMostViewedGenre() { return mostViewedGenre; }
+    public void setMostViewedGenre(int mostViewedGenre) { this.mostViewedGenre = mostViewedGenre; }
+
+    public int getFollowerCount() { return followerCount; }
+    public void setFollowerCount(int followerCount) { this.followerCount = followerCount; }
+
+    public Gender getGender() { return gender; }
+    public void setGender(Gender gender) { this.gender = gender; }
+
+    public boolean isConfirmed() { return confirmed; }
+    public void setConfirmed(boolean confirmed) { this.confirmed = confirmed; }
 
     public UUID getId() {
         return u;
