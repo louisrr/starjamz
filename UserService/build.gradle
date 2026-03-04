@@ -54,6 +54,19 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java
 	implementation group: 'com.sendgrid', name: 'sendgrid-java', version: '4.10.2'
+
+	// BouncyCastle - Blake3 password hashing
+	implementation 'org.bouncycastle:bcprov-jdk18on:1.78.1'
+
+	// AWS SDK v2 - SES for email confirmation
+	implementation platform('software.amazon.awssdk:bom:2.25.35')
+	implementation 'software.amazon.awssdk:sesv2'
+
+	// Twilio - SMS confirmation
+	implementation 'com.twilio.sdk:twilio:10.1.5'
+
+	// Jakarta validation
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
 tasks.named('test') {
