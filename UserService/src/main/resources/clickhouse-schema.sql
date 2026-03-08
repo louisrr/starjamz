@@ -34,7 +34,11 @@ CREATE TABLE IF NOT EXISTS starjamz.users
     device            Nullable(String),
     most_viewed_genre UInt32            DEFAULT 0,
     follower_count    UInt32            DEFAULT 0,
-    gender            LowCardinality(String) DEFAULT ''
+    gender            LowCardinality(String) DEFAULT '',
+    -- Password-reset fields (migration V2)
+    auth_code         UInt32            DEFAULT 0,   -- 6-digit OTP; 0 = none active
+    auth_code_date    Int64             DEFAULT 0,   -- epoch milliseconds of OTP issuance
+    password_changed  UInt8             DEFAULT 0    -- 1 after a successful reset
 )
 ENGINE = ReplacingMergeTree()
 ORDER BY id;

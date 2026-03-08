@@ -93,6 +93,55 @@ public class ConfirmationCode {
     }
 
     // -------------------------------------------------------------------------
+    // Password-reset dispatch — distinct content from signup confirmation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Send a password-reset link to {@code toAddress} via SES.
+     * The link embeds a signed token that encodes the authCode and expiry.
+     *
+     * @param toAddress email address of the account holder
+     * @param resetLink fully-qualified reset URL (e.g. https://starjamz.com/reset-password?token=…)
+     */
+    public void dispatchResetEmail(String toAddress, String resetLink) {
+        String subject = "Reset your Starjamz password";
+        String body    = "We received a request to reset the password for your Starjamz account.\n\n"
+                       + "Click the link below to choose a new password (expires in 15 minutes):\n\n"
+                       + resetLink + "\n\n"
+                       + "If you did not request a password reset, you can safely ignore this email.";
+
+        SendEmailRequest request = SendEmailRequest.builder()
+                .fromEmailAddress(sesFromEmail)
+                .destination(Destination.builder().toAddresses(toAddress).build())
+                .content(EmailContent.builder()
+                        .simple(software.amazon.awssdk.services.sesv2.model.Message.builder()
+                                .subject(Content.builder().data(subject).charset("UTF-8").build())
+                                .body(Body.builder()
+                                        .text(Content.builder().data(body).charset("UTF-8").build())
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+
+        sesClient.sendEmail(request);
+    }
+
+    /**
+     * Send a password-reset auth code via SMS (Twilio) for phone-only accounts.
+     *
+     * @param toNumber E.164 phone number
+     * @param authCode 6-digit code to include in the message
+     */
+    public void dispatchResetSms(String toNumber, String authCode) {
+        Message.creator(
+                new PhoneNumber(toNumber),
+                new PhoneNumber(twilioFrom),
+                "Your Starjamz password reset code is: " + authCode + ". Expires in 15 minutes. "
+                + "Do not share this code."
+        ).create();
+    }
+
+    // -------------------------------------------------------------------------
     // Internal senders
     // -------------------------------------------------------------------------
 

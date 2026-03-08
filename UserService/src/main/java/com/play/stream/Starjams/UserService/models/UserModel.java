@@ -41,6 +41,11 @@ public class UserModel {
     // Transient signup fields (not persisted long-term)
     private boolean confirmed;
 
+    // Password reset fields
+    private int     authCode;          // 6-digit OTP stored during forgot-password flow
+    private long    authCodeDate;      // epoch milliseconds when authCode was issued
+    private boolean passwordChanged;   // set true after a successful password reset
+
     public UUID getU() {
         return u;
     }
@@ -207,6 +212,15 @@ public class UserModel {
 
     public boolean isConfirmed() { return confirmed; }
     public void setConfirmed(boolean confirmed) { this.confirmed = confirmed; }
+
+    public int getAuthCode() { return authCode; }
+    public void setAuthCode(int authCode) { this.authCode = authCode; }
+
+    public long getAuthCodeDate() { return authCodeDate; }
+    public void setAuthCodeDate(long authCodeDate) { this.authCodeDate = authCodeDate; }
+
+    public boolean isPasswordChanged() { return passwordChanged; }
+    public void setPasswordChanged(boolean passwordChanged) { this.passwordChanged = passwordChanged; }
 
     public UUID getId() {
         return u;
