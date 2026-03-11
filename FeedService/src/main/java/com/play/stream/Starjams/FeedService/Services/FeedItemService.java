@@ -2,18 +2,10 @@ package com.play.stream.Starjams.FeedService.Services;
 
 import com.play.stream.Starjams.FeedService.Models.FeedItemModel;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.cassandra.core.CassandraTemplate;
-
+/** @deprecated Replaced by the new Aerospike-backed service layer. */
+@Deprecated
 public class FeedItemService {
-
-    public FeedItemService() {
-    }
-
-    @Autowired
-    private CassandraTemplate cassandraTemplate;
-
     public FeedItemModel createSettings(FeedItemModel settings) {
-        return cassandraTemplate.insert(settings);
+        return settings;
     }
 }
