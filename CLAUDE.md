@@ -7,10 +7,15 @@ repository: its architecture, conventions, workflows, and key implementation det
 
 ## Project Overview
 
-**Starjamz** is a cloud-based music streaming platform built as a microservices application.
+**Starjamz / Fetio** is a cloud-based music streaming and peer-to-peer social gifting platform.
 It targets musicians, podcasters, educators, event organizers, fitness instructors, charities,
 and gaming communities. The backend is composed of independent Spring Boot services behind a
 single API gateway; the frontend is a Next.js 14 application.
+
+The platform includes a **social music feed layer** powered by AerospikeDB: a follow graph,
+fan-out-on-write activity feeds, viral mechanics (reposts, trending, First-48, gift-to-unlock),
+per-user feed ranking, digest cards, livestream feed integration, and a push notification
+infrastructure via NotificationService.
 
 ---
 
@@ -20,10 +25,11 @@ single API gateway; the frontend is a Next.js 14 application.
 starjamz/
 ├── GatewayService/       # API gateway (port 8080)
 ├── AdminService/         # Admin management (port 8083)
-├── FeedService/          # User activity feeds (port 8085)
+├── FeedService/          # Social feed, follow graph, fan-out, ranking (port 8085)
 ├── LikeService/          # Like/reaction tracking (port 8086)
 ├── MediaService/         # Video/media processing
 ├── MusicService/         # Music streaming core (port 8082)
+├── NotificationService/  # Push/in-app notifications, dedup, preferences (port 8088)
 ├── PaymentService/       # Stripe payment integration (port 8081)
 ├── PlaylistService/      # Playlist management (placeholder, not implemented)
 ├── UploadService/        # File uploads to S3 / ScyllaDB (port 8087)
@@ -119,8 +125,11 @@ Each backend service follows the same self-contained layout:
 | FeedService | 8085 | 8080 |
 | LikeService | 8086 | 8080 |
 | UploadService | 8087 | 8080 |
+| NotificationService | 8088 | 8080 |
 | Frontend | 3000 | 3000 |
 | ScyllaDB | 9042 | 9042 |
+| Aerospike | 3000 | 3000 |
+| PostgreSQL | 5432 | 5432 |
 
 All backend services internally bind to port `8080` and are differentiated only by the host
 port mapping in `docker-compose.yml`.
@@ -141,6 +150,7 @@ The GatewayService (`:8080`) strips the first path segment and load-balances via
 | `/like/**` | `like-service` |
 | `/playlist/**` | `playlist-service` |
 | `/upload/**` | `upload-service` |
+| `/notification/**` | `notification-service` |
 
 ---
 
@@ -305,11 +315,107 @@ Init script: `scylla/init.sh` (run once by the `scylla-init` Docker service)
 
 ---
 
+## Feed & Social Layer Architecture (FeedService)
+
+FeedService is the core social layer. Key packages:
+
+```
+FeedService/src/main/java/com/play/stream/Starjams/FeedService/
+├── config/          AerospikeConfig, AsyncConfig, KafkaTopics
+├── controller/      FollowController, FeedController, TrendingController
+├── consumer/        FeedFanoutConsumer (track.posted, track.engaged, livestream.event)
+│                    StatsUpdateConsumer (track.engaged — increments counters, scoring)
+├── services/        FollowGraphService  — Aerospike Map CDT follow graph
+│                    FeedFanoutService   — async fan-out writes to follower feed bins
+│                    FeedReadService     — scan + rank + paginate feed
+│                    FeedRankingService  — weighted score algorithm (recency/engagement/affinity/viral/diversity)
+│                    TrendingService     — decayed trending score, Aerospike sorted maps
+│                    ViralMechanicsService — repost chain, buzzing, gift-to-unlock, play streak
+│                    AffinityService     — per-user artist affinity EMA
+│                    PrivacyService      — activity-sharing privacy controls
+├── model/           FeedEvent, EventType, DigestCard, LivestreamCard, TrendingUserCard
+├── dto/             TrackPostedEvent, TrackEngagedEvent, FeedPage, PrivacySettingsRequest
+├── entity/          Follow (JPA), FeedEventLog (JPA)
+└── repository/      FollowRepository, FeedEventLogRepository
+```
+
+### Aerospike Namespace: `fetio`
+
+| Set | Key | Purpose |
+|---|---|---|
+| `feed:{userId}` | `{userId}:{eventId}` | Personal feed bins, TTL=72h |
+| `follows:{userId}` | userId | Map CDT: followees → epochMs |
+| `followers:{userId}` | userId | Map CDT: followers → epochMs |
+| `track_stats:{trackId}` | trackId | Engagement counters (atomic) |
+| `trending_tracks` | "global" | Score map for trending |
+| `affinity:{userId}` | userId | Artist affinity scores (EMA) |
+| `user_prefs:{userId}` | userId | Privacy settings |
+| `stream_feed_pin:{userId}` | userId | Active pinned livestream |
+| `notif_dedup` | deduplicationKey | TTL-based notification dedup |
+| `notif_prefs:{userId}` | userId | Per-type notification opt-out |
+
+### Feed Ranking Score
+
+```
+score = (recencyScore   * 0.35)   // e^(-0.001 * ageMinutes)
+      + (engagementScore * 0.25)  // log-normalised weighted counters
+      + (affinityScore   * 0.20)  // per-user artist affinity [0,1]
+      + (viralScore      * 0.15)  // repost velocity in 2h
+      + (diversityPenalty * 0.05) // −penalty if actor appears >3× in top 20
+```
+
+Bonuses: `isBuzzing` → +0.30; `isNew` (First-48 small creator) → ×2.5; livestream → +10.0.
+
+### Fan-out Policy by Event Type
+
+| Event | Fan-out Rule |
+|---|---|
+| TRACK_POSTED / REPOSTED / VIDEO_POSTED | All followers, immediately |
+| TRACK_LIKED / VIDEO_LIKED | Only if track >50 likes OR actor >200 followers |
+| TRACK_PLAYED / VIDEO_VIEWED | Batched into DigestCard (no individual fan-out) |
+| ARTIST_FOLLOWED | Discovery nudge card to actor's followers |
+| LIVESTREAM_STARTED | All followers, elevated priority, pinned |
+
+### Kafka Topics
+
+| Topic | Producer | Consumer |
+|---|---|---|
+| `track.posted` | UploadService | FeedFanoutConsumer |
+| `track.engaged` | Any service | FeedFanoutConsumer + StatsUpdateConsumer |
+| `livestream.event` | MediaService | FeedFanoutConsumer |
+| `playlist.event` | PlaylistService | FeedFanoutConsumer |
+| `notification.event` | FeedService | NotificationEventConsumer |
+| `engagement.counter.flush` | FeedService | (PostgreSQL sync consumer) |
+
+---
+
+## NotificationService
+
+New microservice (port 8088). Consumes `notification.event` from all other services.
+
+**Responsibilities:**
+- Deduplication via Aerospike TTL records (`notif_dedup` set)
+- User notification preference opt-out (`notif_prefs:{userId}`)
+- Persistence to PostgreSQL `user_notifications` table
+- Push delivery via Firebase Cloud Messaging (FCM)
+
+**REST API:**
+- `GET  /api/v1/users/{userId}/notifications` — paginated inbox
+- `GET  /api/v1/users/{userId}/notifications/unread-count`
+- `POST /api/v1/users/{userId}/notifications/mark-all-read`
+
+---
+
 ## What Is Not Yet Implemented
 
 - **PlaylistService** — directory exists with only a Spring Boot stub, no source code.
 - **Frontend pages** — only `index.tsx` (Next.js boilerplate) and a minimal `login.tsx` exist.
-- **Embedded infrastructure** — Eureka, Kafka, and Redis are not in `docker-compose.yml`.
+- **Embedded infrastructure** — Eureka, Kafka, and Redis are not in `docker-compose.yml`
+  (Aerospike and PostgreSQL were added for FeedService/NotificationService).
 - **Frontend tests** — no test files exist yet.
+- **Popular content blending** — FeedReadService has the blend-ratio logic wired, but
+  popular FeedEvent hydration from PostgreSQL/Redis is marked TODO.
+- **FCM push dispatch** — NotificationDeliveryService has the delivery hook; actual
+  Firebase SDK call requires `FIREBASE_CREDENTIALS_PATH` secret.
 
 When implementing PlaylistService, follow the same Gradle + Spring Boot structure as other services and register it with Eureka as `playlist-service`.
