@@ -1,0 +1,89 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: feed-service
+
+  # PostgreSQL — system of record
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/fetio}
+    username: ${POSTGRES_USER:fetio}
+    password: ${POSTGRES_PASSWORD:fetio}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  # Kafka
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+    consumer:
+      group-id: feed-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# Aerospike
+aerospike:
+  host: ${AEROSPIKE_HOST:localhost}
+  port: ${AEROSPIKE_PORT:3000}
+  namespace: fetio
+  # Feed event TTL: 72 hours
+  feed-ttl-seconds: 259200
+  # Digest buffer TTL: 4 hours
+  digest-ttl-seconds: 14400
+
+# Feed configuration
+feed:
+  # Fan-out threshold: max followers to fan out synchronously
+  max-sync-fanout: 10000
+  # Follower count thresholds for blending popular content
+  new-user-following-max: 10
+  growing-user-following-max: 50
+  # Popular/follow blend ratios (new / growing / established)
+  popular-blend-new: 0.70
+  popular-blend-growing: 0.40
+  popular-blend-established: 0.15
+  # First 48h viral window boost
+  first48-boost: 2.5
+  first48-max-followers: 500
+  # Buzzing threshold: plays in 6h
+  buzzing-play-threshold: 100
+  buzzing-window-hours: 6
+  # Trending decay constant (λ)
+  trending-decay-lambda: 0.05
+  # Play streak threshold for notification
+  streak-days: 3
+
+# Eureka
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+# OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Async thread pool
+async:
+  core-pool-size: 10
+  max-pool-size: 50
+  queue-capacity: 1000

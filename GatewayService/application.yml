@@ -53,6 +53,18 @@ spring:
             - Path=/playlist/**
           filters:
             - StripPrefix=1
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notification/**
+          filters:
+            - StripPrefix=1
+        - id: upload-service
+          uri: lb://upload-service
+          predicates:
+            - Path=/upload/**
+          filters:
+            - StripPrefix=1
 
   loadbalancer:
     ribbon:

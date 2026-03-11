@@ -21,10 +21,6 @@ services:
     build: ./UserService
     ports:
       - "8084:8080"      
-  feed-service:
-    build: ./FeedService
-    ports:
-      - "8085:8080"   
   like-service:
     build: ./LikeService
     ports:
@@ -39,6 +35,62 @@ services:
     depends_on:
       scylla-init:
         condition: service_completed_successfully
+
+  notification-service:
+    build: ./NotificationService
+    ports:
+      - "8088:8080"
+    environment:
+      - AEROSPIKE_HOST=aerospike
+      - AEROSPIKE_PORT=3000
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/fetio
+      - POSTGRES_USER=fetio
+      - POSTGRES_PASSWORD=fetio
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - postgres
+      - aerospike
+
+  # ── Feed Service overrides (Aerospike + PostgreSQL) ───────────────────────────
+  feed-service:
+    build: ./FeedService
+    ports:
+      - "8085:8080"
+    environment:
+      - AEROSPIKE_HOST=aerospike
+      - AEROSPIKE_PORT=3000
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/fetio
+      - POSTGRES_USER=fetio
+      - POSTGRES_PASSWORD=fetio
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      - postgres
+      - aerospike
+
+  # ── Aerospike ─────────────────────────────────────────────────────────────────
+  aerospike:
+    image: aerospike/aerospike-server:7.0.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - aerospike_data:/opt/aerospike/data
+
+  # ── PostgreSQL (system of record for FeedService + NotificationService) ───────
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: fetio
+      POSTGRES_USER: fetio
+      POSTGRES_PASSWORD: fetio
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fetio"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   # ── Frontend ──────────────────────────────────────────────────────────────────
   frontend:
@@ -81,3 +133,5 @@ services:
 
 volumes:
   scylla_data:
+  aerospike_data:
+  postgres_data:
