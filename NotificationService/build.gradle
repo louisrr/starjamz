@@ -33,7 +33,7 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
 	// Aerospike — stores user notification preferences and dedup state
-	implementation 'com.aerospike:aerospike-client:8.1.2'
+	implementation 'com.aerospike:aerospike-client-jdk21:8.1.2'
 
 	// Kafka — receives notification events from all other services
 	implementation 'org.springframework.kafka:spring-kafka'
