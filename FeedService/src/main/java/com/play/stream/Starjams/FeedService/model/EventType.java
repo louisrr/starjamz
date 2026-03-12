@@ -10,6 +10,7 @@ public enum EventType {
     TRACK_LIKED,
     TRACK_PLAYED,
     TRACK_REPOSTED,
+    TRACK_REMIXED,
 
     // Video
     VIDEO_POSTED,
