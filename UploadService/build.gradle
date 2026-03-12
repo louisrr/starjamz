@@ -37,6 +37,12 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3
 	implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.666'
 
+	// Aerospike — stem metadata storage
+	implementation 'com.aerospike:aerospike-client:8.1.2'
+
+	// Jackson JSR-310 for Instant serialization
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
 	runtimeOnly 'com.h2database:h2'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

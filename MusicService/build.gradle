@@ -61,6 +61,23 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.freedesktop.gstreamer/gst1-java-core
 	implementation group: 'org.freedesktop.gstreamer', name: 'gst1-java-core', version: '1.4.0'
+
+	// Spring Kafka for KafkaTemplate
+	implementation 'org.springframework.kafka:spring-kafka'
+
+	// Aerospike — stem metadata, session state, tier tracking
+	implementation 'com.aerospike:aerospike-client:8.1.2'
+
+	// PostgreSQL + JPA — stem_royalty_ledger
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Flyway — schema migrations
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// Jackson extras
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 tasks.named('test') {

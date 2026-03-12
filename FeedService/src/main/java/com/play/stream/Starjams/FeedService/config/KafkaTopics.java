@@ -19,4 +19,7 @@ public final class KafkaTopics {
 
     // Counter sync to PostgreSQL
     public static final String COUNTER_FLUSH      = "engagement.counter.flush";
+
+    // Stem Economy
+    public static final String REMIX_CREATED      = "remix.created";
 }
