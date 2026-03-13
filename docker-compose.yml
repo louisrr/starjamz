@@ -51,6 +51,28 @@ services:
       - postgres
       - aerospike
 
+  # ── Media Ingress Service ─────────────────────────────────────────────────────
+  media-ingress-service:
+    build: ./MediaIngressService
+    ports:
+      - "8089:8080"
+    environment:
+      - AEROSPIKE_HOST=aerospike
+      - AEROSPIKE_PORT=3000
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/fetio
+      - POSTGRES_USER=fetio
+      - POSTGRES_PASSWORD=fetio
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - AWS_ACCESS_KEY=placeholder
+      - AWS_SECRET_KEY=placeholder
+      - S3_BUCKET=starjamz-media
+      - HLS_OUTPUT_DIR=/tmp/hls
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme
+    depends_on:
+      - postgres
+      - aerospike
+
   # ── Feed Service overrides (Aerospike + PostgreSQL) ───────────────────────────
   feed-service:
     build: ./FeedService

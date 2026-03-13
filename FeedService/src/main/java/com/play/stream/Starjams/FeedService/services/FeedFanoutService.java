@@ -100,15 +100,41 @@ public class FeedFanoutService {
             feedEvent.getActorId(), feedEvent.getTrackId(), targetFollowers.size());
     }
 
+    private static final int  LARGE_BROADCASTER_THRESHOLD = 10_000;
+    private static final int  FANOUT_BATCH_SIZE            = 1_000;
+    private static final long FANOUT_BATCH_DELAY_MS        = 100L;
+
     @Async("feedFanoutExecutor")
     public void fanOutLivestream(FeedEvent livestreamEvent, List<UUID> followerIds) {
-        // Write with elevated priority (score boosted by caller before this)
-        writeToFollowers(livestreamEvent, followerIds);
+        if (followerIds.size() <= LARGE_BROADCASTER_THRESHOLD) {
+            writeToFollowers(livestreamEvent, followerIds);
+        } else {
+            List<List<UUID>> batches = partitionList(followerIds, FANOUT_BATCH_SIZE);
+            log.info("Large broadcaster fan-out: {} followers in {} batches of {}",
+                followerIds.size(), batches.size(), FANOUT_BATCH_SIZE);
+            for (List<UUID> batch : batches) {
+                writeToFollowers(livestreamEvent, batch);
+                try {
+                    Thread.sleep(FANOUT_BATCH_DELAY_MS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
 
         // Pin to top of each follower's feed
         for (UUID followerId : followerIds) {
             pinLivestreamForUser(followerId, livestreamEvent.getStreamId());
         }
+    }
+
+    private static List<List<UUID>> partitionList(List<UUID> list, int batchSize) {
+        List<List<UUID>> partitions = new java.util.ArrayList<>();
+        for (int i = 0; i < list.size(); i += batchSize) {
+            partitions.add(list.subList(i, Math.min(i + batchSize, list.size())));
+        }
+        return partitions;
     }
 
     // -------------------------------------------------------------------------

@@ -29,7 +29,8 @@ public class GatewayService {
             @Value("${payment.service.base-url:lb://payment-service}") String paymentServiceBaseUrl,
             @Value("${playlist.service.base-url:lb://playlist-service}") String playlistServiceBaseUrl,
             @Value("${user.service.base-url:lb://user-service}") String userServiceBaseUrl,
-            @Value("${upload.service.base-url:lb://upload-service}") String uploadServiceBaseUrl) {
+            @Value("${upload.service.base-url:lb://upload-service}") String uploadServiceBaseUrl,
+            @Value("${media-ingress.service.base-url:lb://media-ingress-service}") String mediaIngressServiceBaseUrl) {
         this.webClientBuilder = webClientBuilder;
         this.serviceBaseUrls = new HashMap<>();
         this.serviceBaseUrls.put("admin", adminServiceBaseUrl);
@@ -40,6 +41,7 @@ public class GatewayService {
         this.serviceBaseUrls.put("playlist", playlistServiceBaseUrl);
         this.serviceBaseUrls.put("user", userServiceBaseUrl);
         this.serviceBaseUrls.put("upload", uploadServiceBaseUrl);
+        this.serviceBaseUrls.put("media-ingress", mediaIngressServiceBaseUrl);
     }
 
     public ResponseEntity<String> proxyRequest(
