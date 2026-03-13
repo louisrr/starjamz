@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: media-ingress-service
+
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/fetio}
+    username: ${POSTGRES_USER:fetio}
+    password: ${POSTGRES_PASSWORD:fetio}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+aerospike:
+  host: ${AEROSPIKE_HOST:localhost}
+  port: ${AEROSPIKE_PORT:3000}
+  namespace: fetio
+
+aws:
+  access-key: ${AWS_ACCESS_KEY:}
+  secret-key: ${AWS_SECRET_KEY:}
+  s3:
+    bucket: ${S3_BUCKET:starjamz-media}
+    region: ${S3_REGION:us-east-1}
+    vod-prefix: vod
+    hls-prefix: hls
+
+media-ingress:
+  stream-key-ttl-hours: 6
+  hls-output-dir: ${HLS_OUTPUT_DIR:/tmp/hls}
+  rtsp-server-url: ${RTSP_SERVER_URL:rtsp://localhost:8554}
+  ingest-rtmp-port: ${RTMP_INGEST_PORT:1935}
+  fanout-batch-size: 1000
+  fanout-batch-delay-ms: 100
+  large-broadcaster-threshold: 10000
+  vod-retention-days: 90
+  cdn-base-url: ${CDN_BASE_URL:https://cdn.starjamz.com}
+
+admin:
+  username: ${ADMIN_USERNAME:admin}
+  password: ${ADMIN_PASSWORD:changeme}
+
+async:
+  gstreamer-core-pool-size: 20
+  gstreamer-max-pool-size: 50
+  fanout-core-pool-size: 10
+  fanout-max-pool-size: 30
+  queue-capacity: 500
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

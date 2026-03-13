@@ -1,58 +1,44 @@
 package com.play.stream.Starjams.LikeService;
 
-import com.play.stream.Starjams.LikeService.Models.LikeModel;
+import com.play.stream.Starjams.LikeService.dto.LikeCountResponse;
+import com.play.stream.Starjams.LikeService.dto.LikeStatusResponse;
+import com.play.stream.Starjams.LikeService.dto.PagedLikersResponse;
+import com.play.stream.Starjams.LikeService.dto.UserLikesPageResponse;
+import com.play.stream.Starjams.LikeService.model.ContentType;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface LikeService {
 
     /**
-     * Adds a like to a stream by a user.
-     *
-     * @param userId The ID of the user who is liking the stream.
-     * @param streamId The ID of the stream being liked.
+     * Like a content item. Idempotent — calling twice has no side effects.
      */
-    void addLike(UUID userId, UUID streamId);
+    void like(UUID userId, UUID contentId, ContentType contentType);
 
     /**
-     * Removes a like from a stream by a user.
-     *
-     * @param userId The ID of the user whose like is to be removed.
-     * @param streamId The ID of the stream from which the like is to be removed.
+     * Unlike a content item. Idempotent — calling when not liked has no side effects.
      */
-    void removeLike(UUID userId, UUID streamId);
+    void unlike(UUID userId, UUID contentId, ContentType contentType);
 
     /**
-     * Counts the total number of likes for a specific stream.
-     *
-     * @param streamId The ID of the stream.
-     * @return The total number of likes.
+     * Returns the current total like count for a content item (Aerospike only).
      */
-    long countLikes(UUID streamId);
+    LikeCountResponse getLikeCount(UUID contentId, ContentType contentType);
 
     /**
-     * Checks if a specific user has already liked a particular stream.
-     *
-     * @param userId The ID of the user.
-     * @param streamId The ID of the stream.
-     * @return true if the user has liked the stream, false otherwise.
+     * Returns whether the user has liked the item and the total like count (Aerospike only).
      */
-    boolean checkLikeStatus(UUID userId, UUID streamId);
+    LikeStatusResponse getLikeStatus(UUID userId, UUID contentId, ContentType contentType);
 
     /**
-     * Retrieves a list of stream IDs that a specific user has liked.
-     *
-     * @param userId The ID of the user.
-     * @return A list of stream IDs liked by the user.
+     * Returns a paginated list of user IDs who liked a content item.
+     * Recent likers are served from Aerospike; full history falls back to PostgreSQL.
      */
-    List<String> getLikedStreams(UUID userId);
+    PagedLikersResponse getRecentLikers(UUID contentId, ContentType contentType, int limit, String cursor);
 
     /**
-     * Gets a list of user IDs who have liked a specific stream.
-     *
-     * @param streamId The ID of the stream.
-     * @return A list of user IDs who have liked the stream.
+     * Returns all content items liked by a user, filtered by content type, paginated.
+     * Served from PostgreSQL (cold read path).
      */
-    List<String> getLikesByStream(UUID streamId);
+    UserLikesPageResponse getUserLikes(UUID userId, ContentType contentType, int limit, String cursor);
 }

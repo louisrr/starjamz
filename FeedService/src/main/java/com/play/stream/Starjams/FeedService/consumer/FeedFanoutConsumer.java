@@ -93,7 +93,8 @@ public class FeedFanoutConsumer {
                     // Only record affinity on >80% completion; no individual fan-out
                     log.debug("Play event batched into digest — no individual fan-out");
                 }
-                case TRACK_REPOSTED -> handleRepostEvent(event);
+                case TRACK_REPOSTED  -> handleRepostEvent(event);
+                case TRACK_REMIXED   -> handleRemixEvent(event);
                 case ARTIST_FOLLOWED -> handleFollowEvent(event);
                 default -> log.debug("No fan-out policy for event type {}", type);
             }
@@ -145,6 +146,15 @@ public class FeedFanoutConsumer {
 
     private void handleRepostEvent(com.play.stream.Starjams.FeedService.dto.TrackEngagedEvent event) {
         // All followers of the reposter receive the repost — no threshold
+        FeedEvent feedEvent = buildActivityFeedEvent(event);
+        List<UUID> followers = followGraph.getAllFollowers(event.getActorId());
+        fanout.fanOutEngagement(feedEvent, followers);
+    }
+
+    private void handleRemixEvent(com.play.stream.Starjams.FeedService.dto.TrackEngagedEvent event) {
+        // All followers of the remixer receive the remix event — no threshold.
+        // RemixService (via remix.created Kafka topic) handles the primary fan-out;
+        // this branch covers remix engagements that flow through track.engaged.
         FeedEvent feedEvent = buildActivityFeedEvent(event);
         List<UUID> followers = followGraph.getAllFollowers(event.getActorId());
         fanout.fanOutEngagement(feedEvent, followers);
