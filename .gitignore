@@ -1,2 +1,2 @@
-git add .gitignore
-git commit -m "Add .gitignore with node_modules"
+node_modules/
+MediaIngressService/.gradle/
