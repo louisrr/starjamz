@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.springframework.kafka:spring-kafka'
 
 	// Aerospike — live session state and fan-out progress
-	implementation 'com.aerospike:aerospike-client:8.1.2'
+	implementation 'com.aerospike:aerospike-client-bc-jdk8:8.1.2'
 
 	// GStreamer Java bindings (wraps native GStreamer 1.x via JNA)
 	implementation 'org.freedesktop.gstreamer:gst1-java-core:1.4.0'
