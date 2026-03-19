@@ -2,32 +2,163 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── CSS custom properties ──────────────────────────────────────────────── */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --color-brand:   #AAFF00;
+  --color-accent:  #7700FF;
+  --color-surface: #080C04;
+  --color-ink:     #F0F5E0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+/* ─── Base reset ─────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #080C04;
+    color: #F0F5E0;
+    font-family: Inter, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #111A06;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3A4D1C;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #AAFF00;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+/* ─── Component layer ────────────────────────────────────────────────────── */
+@layer components {
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm
+           bg-brand-300 text-surface-base
+           transition-all duration-150
+           hover:bg-brand-200 hover:shadow-lime-md
+           active:bg-brand-400 active:scale-95
+           disabled:bg-brand-700 disabled:text-ink-disabled disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm
+           bg-transparent border border-surface-border text-ink-secondary
+           transition-all duration-150
+           hover:border-brand-300 hover:text-brand-300
+           active:scale-95;
+  }
+
+  .btn-violet {
+    @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm
+           bg-accent-400 text-white
+           transition-all duration-150
+           hover:bg-accent-300 hover:shadow-violet-md
+           active:bg-accent-500 active:scale-95;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-surface-raised border border-surface-border rounded-2xl
+           transition-all duration-200
+           hover:border-surface-muted hover:bg-surface-overlay;
+  }
+
+  .card-featured {
+    @apply card border-brand-700 bg-gradient-to-br from-surface-raised to-surface-overlay;
+    background-image: linear-gradient(135deg, #111A06 0%, #1A2A0A 100%);
+  }
+
+  /* Waveform bars */
+  .waveform-bar {
+    @apply w-0.5 rounded-full bg-waveform-gradient origin-bottom;
+    animation: waveform 1.2s ease-in-out infinite alternate;
+  }
+
+  /* Text gradient (gradient text for headings) */
+  .text-brand-gradient {
+    background: linear-gradient(135deg, #AAFF00 0%, #7700FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glow utilities */
+  .glow-lime {
+    box-shadow: 0 0 20px rgba(170,255,0,0.45);
+  }
+  .glow-violet {
+    box-shadow: 0 0 20px rgba(119,0,255,0.55);
+  }
+
+  /* Live badge */
+  .badge-live {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           bg-red-600 text-white text-xs font-bold uppercase tracking-wider;
+  }
+
+  /* Buzzing badge */
+  .badge-buzzing {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           bg-brand-300 text-surface-base text-xs font-bold uppercase tracking-wider;
+  }
+
+  /* New / First-48 badge */
+  .badge-new {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full
+           bg-accent-400 text-white text-xs font-bold uppercase tracking-wider;
+  }
+
+  /* Stat pill */
+  .stat-pill {
+    @apply inline-flex items-center gap-1 text-xs text-ink-muted
+           hover:text-ink-secondary transition-colors cursor-pointer;
+  }
+
+  /* Feed skeleton */
+  .skeleton {
+    @apply animate-pulse rounded-lg bg-surface-subtle;
+  }
+
+  /* Progress bar (gift-to-unlock) */
+  .gift-progress-bar {
+    @apply h-1 rounded-full bg-surface-subtle overflow-hidden;
+  }
+  .gift-progress-fill {
+    @apply h-full rounded-full bg-brand-gradient transition-all duration-500;
+  }
 }
 
+/* ─── Utility layer ──────────────────────────────────────────────────────── */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
