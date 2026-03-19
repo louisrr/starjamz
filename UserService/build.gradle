@@ -39,7 +39,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-	// Aerospike - system of engagement
+	// Aerospike
 	implementation 'com.aerospike:aerospike-client:8.1.2'
 
 	// ClickHouse JDBC - system of record
