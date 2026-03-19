@@ -153,4 +153,12 @@ body {
   .waveform-bar {
     @apply w-1 rounded-full bg-brand-gradient origin-bottom;
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
