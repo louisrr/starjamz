@@ -1,30 +1,128 @@
 version: '3.8'
 
 services:
+
+  # ── Service Discovery ─────────────────────────────────────────────────────
+  eureka:
+    image: springcloud/eureka
+    ports:
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # ── Zookeeper (Kafka dependency) ──────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Kafka ─────────────────────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ── Redis ─────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   gateway-service:
     build: ./GatewayService
     ports:
       - "8080:8080"
+    depends_on:
+      eureka:
+        condition: service_healthy
+
   payment-service:
     build: ./PaymentService
     ports:
       - "8081:8080"
+    depends_on:
+      eureka:
+        condition: service_healthy
+
   music-service:
     build: ./MusicService
     ports:
       - "8082:8080"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      eureka:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
   admin-service:
     build: ./AdminService
     ports:
       - "8083:8080"
+    depends_on:
+      eureka:
+        condition: service_healthy
+
   user-service:
     build: ./UserService
     ports:
-      - "8084:8080"      
+      - "8084:8080"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      eureka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   like-service:
     build: ./LikeService
     ports:
       - "8086:8080"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      eureka:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
   upload-service:
     build: ./UploadService
     ports:
@@ -32,9 +130,14 @@ services:
     environment:
       - SPRING_DATA_CASSANDRA_CONTACT_POINTS=scylla
       - SPRING_DATA_CASSANDRA_KEYSPACE_NAME=starjamz_uploads
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
       scylla-init:
         condition: service_completed_successfully
+      eureka:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   notification-service:
     build: ./NotificationService
@@ -48,8 +151,14 @@ services:
       - POSTGRES_PASSWORD=fetio
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     depends_on:
-      - postgres
-      - aerospike
+      postgres:
+        condition: service_healthy
+      aerospike:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
   # ── Media Ingress Service ─────────────────────────────────────────────────────
   media-ingress-service:
@@ -70,8 +179,14 @@ services:
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=changeme
     depends_on:
-      - postgres
-      - aerospike
+      postgres:
+        condition: service_healthy
+      aerospike:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
   # ── Feed Service overrides (Aerospike + PostgreSQL) ───────────────────────────
   feed-service:
@@ -85,9 +200,37 @@ services:
       - POSTGRES_USER=fetio
       - POSTGRES_PASSWORD=fetio
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
-      - postgres
-      - aerospike
+      postgres:
+        condition: service_healthy
+      aerospike:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+
+  # ── Playlist Service ──────────────────────────────────────────────────────
+  playlist-service:
+    build: ./PlaylistService
+    ports:
+      - "8090:8080"
+    environment:
+      - POSTGRES_URL=jdbc:postgresql://postgres:5432/fetio
+      - POSTGRES_USER=fetio
+      - POSTGRES_PASSWORD=fetio
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
 
   # ── Aerospike ─────────────────────────────────────────────────────────────────
   aerospike:
@@ -120,7 +263,7 @@ services:
     ports:
       - "3000:3000"
 
-  # ── ScyllaDB ─────────────────────────────────────────────────────────────────
+  # ── ScyllaDB ─────────────────────────────────────────────────────────────
   scylla:
     image: scylladb/scylla:5.4
     ports:
