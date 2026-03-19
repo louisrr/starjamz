@@ -2,15 +2,23 @@ package com.play.stream.Starjams.NotificationService.service;
 
 import com.aerospike.client.*;
 import com.aerospike.client.policy.WritePolicy;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import com.play.stream.Starjams.NotificationService.entity.UserNotification;
 import com.play.stream.Starjams.NotificationService.model.NotificationEvent;
 import com.play.stream.Starjams.NotificationService.repository.UserNotificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Core notification delivery logic:
@@ -34,10 +42,15 @@ public class NotificationDeliveryService {
     private final IAerospikeClient aerospike;
     private final UserNotificationRepository notifRepo;
 
+    @Nullable
+    private final FirebaseMessaging firebaseMessaging;
+
     public NotificationDeliveryService(IAerospikeClient aerospike,
-                                       UserNotificationRepository notifRepo) {
-        this.aerospike  = aerospike;
-        this.notifRepo  = notifRepo;
+                                       UserNotificationRepository notifRepo,
+                                       @Autowired(required = false) FirebaseMessaging firebaseMessaging) {
+        this.aerospike         = aerospike;
+        this.notifRepo         = notifRepo;
+        this.firebaseMessaging = firebaseMessaging;
     }
 
     /**
@@ -66,10 +79,56 @@ public class NotificationDeliveryService {
             recordDedupKey(event);
         }
 
-        // 5. Send push notification
-        // FCM dispatch would happen here.
-        // Implementation depends on the firebase-admin SDK setup and device token lookup.
-        log.info("Push notification delivered to {} — type={}", event.getRecipientId(), event.getType());
+        // 5. Send push notification via FCM
+        sendPushNotification(event, record);
+    }
+
+    // -------------------------------------------------------------------------
+    // FCM push dispatch
+    // -------------------------------------------------------------------------
+
+    private void sendPushNotification(NotificationEvent event, UserNotification record) {
+        if (firebaseMessaging == null) {
+            log.debug("FCM not configured — skipping push for recipient {}", event.getRecipientId());
+            return;
+        }
+
+        String deviceToken = lookupDeviceToken(event.getRecipientId());
+        if (deviceToken == null || deviceToken.isBlank()) {
+            log.debug("No FCM device token for recipient {} — skipping push", event.getRecipientId());
+            return;
+        }
+
+        String title = event.getTitle() != null ? event.getTitle() : event.getType().name();
+        String body  = event.getBody() != null ? event.getBody() : "";
+        Map<String, String> data = event.getData() != null ? event.getData() : Collections.emptyMap();
+
+        Message message = Message.builder()
+            .setToken(deviceToken)
+            .setNotification(Notification.builder()
+                .setTitle(title)
+                .setBody(body)
+                .build())
+            .putAllData(data)
+            .build();
+
+        try {
+            String messageId = firebaseMessaging.send(message);
+            record.setPushed(true);
+            notifRepo.save(record);
+            log.info("FCM push sent to {} — messageId={} type={}", event.getRecipientId(), messageId, event.getType());
+        } catch (FirebaseMessagingException e) {
+            log.error("FCM push failed for recipient {} type={}: {}", event.getRecipientId(), event.getType(), e.getMessage());
+        }
+    }
+
+    private String lookupDeviceToken(java.util.UUID userId) {
+        // Device tokens are stored in Aerospike under notif_prefs:{userId} in the fcmToken bin.
+        // Clients register tokens via the /api/v1/users/{userId}/notifications/device-token endpoint.
+        Key key = new Key(NS, "notif_prefs:" + userId, userId.toString());
+        Record rec = aerospike.get(null, key, "fcmToken");
+        if (rec == null) return null;
+        return rec.getString("fcmToken");
     }
 
     // -------------------------------------------------------------------------
