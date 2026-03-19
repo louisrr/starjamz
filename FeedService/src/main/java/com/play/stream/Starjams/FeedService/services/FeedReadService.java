@@ -12,6 +12,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Reads a user's personal feed from Aerospike, merges in popular/trending content
@@ -245,10 +247,72 @@ public class FeedReadService {
 
         // Fetch top trending track IDs from Aerospike (already scored)
         List<String> trendingIds = trending.getTopTrendingTracks("24h", null, popularSlots);
-        // In a full implementation, trending track metadata would be fetched from
-        // PostgreSQL or Redis and converted to FeedEvents here.
-        // For now, popular injection is proportionally reserved in the result.
-        return ranked; // TODO: merge popular FeedEvents into result
+        if (trendingIds.isEmpty()) return ranked;
+
+        // Build a set of trackIds already present in the personal feed to avoid duplicates
+        Set<String> existingTrackIds = new HashSet<>();
+        for (FeedEvent ev : ranked) {
+            if (ev.getTrackId() != null) existingTrackIds.add(ev.getTrackId().toString());
+        }
+
+        // Construct synthetic FeedEvents for trending tracks not already in the feed
+        List<FeedEvent> popularEvents = new ArrayList<>();
+        for (String trackId : trendingIds) {
+            if (existingTrackIds.contains(trackId)) continue;
+            if (popularEvents.size() >= popularSlots) break;
+
+            FeedEvent popular = new FeedEvent();
+            popular.setEventId(UUID.randomUUID());
+            popular.setEventType(EventType.TRACK_POSTED);
+            popular.setPostedAt(Instant.now());
+            try {
+                popular.setTrackId(UUID.fromString(trackId));
+            } catch (IllegalArgumentException ignored) {
+                continue; // skip malformed IDs
+            }
+
+            // Hydrate real-time counters from Aerospike track_stats
+            Key statsKey = new Key(NS, "track_stats:" + trackId, trackId);
+            Record stats = aerospike.get(null, statsKey,
+                "playCount", "likeCount", "repostCount", "commentCount", "isBuzzing");
+            if (stats != null) {
+                popular.setPlayCount(stats.getLong("playCount"));
+                popular.setLikeCount(stats.getLong("likeCount"));
+                popular.setRepostCount(stats.getLong("repostCount"));
+                popular.setCommentCount(stats.getLong("commentCount"));
+                popular.setBuzzing(stats.getLong("isBuzzing") == 1);
+            }
+
+            // Assign a rank score slightly below the lowest personal-feed item
+            // so popular content fills gaps but personal content ranks higher
+            double baseScore = ranked.isEmpty() ? 0.0 : ranked.get(ranked.size() - 1).getRankScore();
+            popular.setRankScore(baseScore - (0.01 * (popularEvents.size() + 1)));
+
+            popularEvents.add(popular);
+            existingTrackIds.add(trackId);
+        }
+
+        if (popularEvents.isEmpty()) return ranked;
+
+        // Interleave popular events: insert one popular item every N personal items
+        // where N = floor(personalSlots / popularSlots), minimum 1
+        int personalSlots = targetSize - popularEvents.size();
+        int stride = personalSlots > 0 ? Math.max(1, personalSlots / popularEvents.size()) : 1;
+
+        List<FeedEvent> blended = new ArrayList<>(ranked.size() + popularEvents.size());
+        int popularIdx = 0;
+        for (int i = 0; i < ranked.size(); i++) {
+            blended.add(ranked.get(i));
+            if (popularIdx < popularEvents.size() && (i + 1) % stride == 0) {
+                blended.add(popularEvents.get(popularIdx++));
+            }
+        }
+        // Append any remaining popular events not yet inserted
+        while (popularIdx < popularEvents.size()) {
+            blended.add(popularEvents.get(popularIdx++));
+        }
+
+        return blended;
     }
 
     // -------------------------------------------------------------------------

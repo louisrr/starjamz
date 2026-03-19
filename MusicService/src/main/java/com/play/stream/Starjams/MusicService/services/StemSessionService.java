@@ -4,6 +4,7 @@ import com.aerospike.client.Bin;
 import com.aerospike.client.IAerospikeClient;
 import com.aerospike.client.Key;
 import com.aerospike.client.Record;
+import com.aerospike.client.policy.ScanPolicy;
 import com.aerospike.client.policy.WritePolicy;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -195,9 +196,57 @@ public class StemSessionService {
     @Scheduled(fixedRateString = "${stem.royalty.flush.interval.ms:3600000}")
     public void flushRoyaltiesToPostgres() {
         log.info("Starting hourly royalty flush to PostgreSQL");
-        // This hook is wired; real implementation would scan Aerospike set
-        // and batch-insert into stem_royalty_ledger via royaltyRepo.
-        // Kept as a scheduled placeholder matching the architecture spec.
+        try {
+            List<Map.Entry<Key, Record>> pending = new ArrayList<>();
+
+            ScanPolicy sp = new ScanPolicy();
+            aerospike.scanAll(sp, NS, ROYALTY_SET, (key, record) -> {
+                if (record != null) {
+                    pending.add(Map.entry(key, record));
+                }
+            });
+
+            if (pending.isEmpty()) {
+                log.info("Royalty flush: no pending records found");
+                return;
+            }
+
+            List<StemRoyaltyLedger> ledgerEntries = new ArrayList<>(pending.size());
+            for (Map.Entry<Key, Record> entry : pending) {
+                Record rec = entry.getValue();
+                try {
+                    UUID sessionId      = UUID.fromString(rec.getString("sessionId"));
+                    UUID hostUserId     = UUID.fromString(rec.getString("hostUserId"));
+                    UUID listenerUserId = UUID.fromString(rec.getString("listenerUserId"));
+                    double minutes      = rec.getDouble("listenerMinutes");
+
+                    BigDecimal listenerMinutes = BigDecimal.valueOf(minutes);
+                    BigDecimal royaltyAmount   = BigDecimal.valueOf(minutes * ROYALTY_PER_LISTENER_MINUTE);
+
+                    ledgerEntries.add(new StemRoyaltyLedger(
+                        sessionId, hostUserId, listenerUserId, listenerMinutes, royaltyAmount));
+                } catch (Exception e) {
+                    log.warn("Skipping malformed royalty record key={}: {}", entry.getKey(), e.getMessage());
+                }
+            }
+
+            royaltyRepo.saveAll(ledgerEntries);
+            log.info("Royalty flush: persisted {} records to PostgreSQL", ledgerEntries.size());
+
+            // Delete flushed records from Aerospike (at-least-once: only after successful save)
+            for (Map.Entry<Key, Record> entry : pending) {
+                try {
+                    aerospike.delete(null, entry.getKey());
+                } catch (Exception e) {
+                    log.warn("Failed to delete flushed royalty record key={}: {}", entry.getKey(), e.getMessage());
+                }
+            }
+
+            log.info("Royalty flush: removed {} records from Aerospike", pending.size());
+
+        } catch (Exception e) {
+            log.error("Royalty flush failed — records left intact in Aerospike for next run: {}", e.getMessage(), e);
+        }
     }
 
     // -------------------------------------------------------------------------
